@@ -1,0 +1,38 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to right, #0061ff, #60efff);
+    color: #fff;
+}
+
+.container {
+    margin: 100px auto;
+    max-width: 500px;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 50px;
+    border-radius: 10px;
+}
+
+h1 i {
+    margin-right: 10px;
+}
+
+button#payButton {
+    background: linear-gradient(to right, #00c6ff, #0072ff);
+    color: #fff;
+    padding: 15px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+button#payButton:hover {
+    transform: scale(1.05);
+}
+
+#status {
+    margin-top: 30px;
+    font-size: 20px;
+}
