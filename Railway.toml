@@ -1,2 +1,2 @@
 [deploy]
-start = "npm install && npm start"
+start = "npm install && node server.js"
