@@ -1,14 +1,7 @@
 {
-  "name": "ton-telegram-miniapp",
-  "version": "1.0.0",
-  "main": "server.js",
   "scripts": {
     "start": "node server.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+   },
   "dependencies": {
     "@ton-community/assets-sdk": "^0.0.5-beta.0",
     "axios": "^1.7.8",
