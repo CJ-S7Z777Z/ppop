@@ -1,7 +1,9 @@
 // script.js
 
-// Инициируем TonConnect
-const tonConnect = new TonConnect();
+// Инициализируем TonConnect UI
+const tonConnect = new TonConnectUI.TonConnectUI({
+  manifestUrl: window.location.origin + '/tonconnect-manifest.json',
+});
 
 // Элементы страницы
 const connectWalletButton = document.getElementById('connectWalletButton');
@@ -13,21 +15,20 @@ let userWalletAddress = null;
 // Функция для подключения кошелька
 async function connectWallet() {
   try {
-    // Параметры подключения через TonConnect
-    const manifestUrl = window.location.origin + '/tonconnect-manifest.json';
+    // Показываем модальное окно для выбора кошелька
+    await tonConnect.connectWallet();
 
-    await tonConnect.connect({
-      manifestUrl: manifestUrl,
-      bridges: ['https://bridge.tonapi.io/bridge'],
-    });
+    // Проверяем, подключен ли кошелек
+    const wallet = tonConnect.connector.wallet;
+    if (wallet) {
+      userWalletAddress = wallet.account.address;
 
-    // Получаем информацию о подключенном кошельке
-    const walletInfo = tonConnect.wallet;
-    userWalletAddress = walletInfo.account.address;
-
-    statusDiv.innerText = `Кошелек подключен: ${userWalletAddress}`;
-    connectWalletButton.style.display = 'none';
-    payButton.style.display = 'inline-block';
+      statusDiv.innerText = `Кошелек подключен: ${userWalletAddress}`;
+      connectWalletButton.style.display = 'none';
+      payButton.style.display = 'inline-block';
+    } else {
+      statusDiv.innerText = 'Кошелек не подключен. Попробуйте снова.';
+    }
   } catch (error) {
     console.error('Ошибка подключения кошелька:', error);
     statusDiv.innerText = 'Ошибка подключения кошелька';
@@ -36,7 +37,16 @@ async function connectWallet() {
 
 // Генерация уникального идентификатора платежа
 function generateUniqueId() {
-  return crypto.randomUUID();
+  if (window.crypto && crypto.randomUUID) {
+    return crypto.randomUUID();
+  } else {
+    // Простая функция генерации UUID v4
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0,
+        v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
 }
 
 // Обработчик нажатия на кнопку "Оплатить"
@@ -48,8 +58,8 @@ async function initiatePayment() {
 
   const paymentId = generateUniqueId();
   const amountTON = '0.5';
-  const amountNano = TonWeb.utils.toNano(amountTON); // сумма в нанотокенах
-  const destinationWallet = 'UQBDT2vmEdKWRNVcdHiRP3k2JXMsfS5VU-GguXIc2UUBVzah'; // Замените на ваш адрес
+  const amountNano = TonWeb.utils.toNano(amountTON).toString(); // сумма в нанотокенах
+  const destinationWallet = 'ВАШ_АДРЕС_КОШЕЛЬКА'; // Замените на ваш адрес
 
   // Сохраняем paymentId для дальнейшего использования
   localStorage.setItem('paymentId', paymentId);
@@ -60,7 +70,8 @@ async function initiatePayment() {
     messages: [
       {
         address: destinationWallet,
-        amount: amountNano.toString(),
+        amount: amountNano,
+        stateInit: undefined,
         payload: paymentId,
       },
     ],
