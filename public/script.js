@@ -59,7 +59,7 @@ async function initiatePayment() {
   const paymentId = generateUniqueId();
   const amountTON = '0.5';
   const amountNano = TonWeb.utils.toNano(amountTON).toString(); // сумма в нанотокенах
-  const destinationWallet = 'ВАШ_АДРЕС_КОШЕЛЬКА'; // Замените на ваш адрес
+  const destinationWallet = 'UQBDT2vmEdKWRNVcdHiRP3k2JXMsfS5VU-GguXIc2UUBVzah'; // Замените на ваш адрес
 
   // Сохраняем paymentId для дальнейшего использования
   localStorage.setItem('paymentId', paymentId);
