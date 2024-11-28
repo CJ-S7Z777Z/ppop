@@ -4,8 +4,14 @@
   <meta charset="UTF-8">
   <title>TON Mini App</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- Подключаем TonConnect UI (важно подключить перед TonConnect SDK) -->
+  <link rel="stylesheet" href="https://unpkg.com/@tonconnect/ui@0.1.0/dist/styles.min.css">
+  <script src="https://unpkg.com/@tonconnect/ui@0.1.0/dist/tonconnect-ui.bundle.js"></script>
+
   <!-- Подключаем TonConnect SDK -->
-  <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js"></script>
+  <script src="https://unpkg.com/@tonconnect/sdk@0.3.0/dist/tonconnect-sdk.min.js"></script>
+
   <!-- Подключаем TonWeb для работы с TON -->
   <script src="https://cdn.jsdelivr.net/npm/tonweb@0.0.45/dist/tonweb.min.js"></script>
 </head>
