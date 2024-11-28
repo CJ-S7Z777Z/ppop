@@ -1,0 +1,18 @@
+{
+  "name": "ton-telegram-miniapp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@ton-community/assets-sdk": "^0.0.5-beta.0",
+    "axios": "^1.7.8",
+    "express": "^4.21.1",
+    "tonweb": "^0.0.66"
+  }
+}
