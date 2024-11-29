@@ -1,65 +1,69 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Пример TON Connect</title>
-    <!-- Подключите стили TON Connect UI -->
-    <link rel="stylesheet" href="https://unpkg.com/@tonconnect/ui@latest/dist/style.css">
+  <meta charset="UTF-8">
+  <title>TON Connect Integration</title>
 </head>
 <body>
-    <!-- Контейнер для кнопки TON Connect -->
-    <div id="ton-connect"></div>
+  <h1>Интеграция TON Connect</h1>
 
-    <!-- Подключаем библиотеку TON Connect UI из CDN -->
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+  <!-- Элемент для кнопки подключения -->
+  <div id="ton-connect"></div>
 
-    <script>
-        // Инициализация TON Connect UI
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://ppop-production.up.railway.app/tonconnect-manifest.json', // Замените на URL вашего manifest.json
-            buttonRootId: 'ton-connect' // ID элемента, куда будет вставлена кнопка
-        });
+  <!-- Пользовательская кнопка подключения -->
+  <button onclick="connectToWallet()">Подключить кошелек</button>
 
-        // Функция для подключения к кошельку
-        async function connectToWallet() {
-            try {
-                const connectedWallet = await tonConnectUI.connectWallet();
-                // Действия после успешного подключения
-                console.log('Подключенный кошелек:', connectedWallet);
-            } catch (error) {
-                console.error('Ошибка при подключении к кошельку:', error);
-            }
-        }
+  <!-- Кнопка отправки транзакции -->
+  <button onclick="sendTransaction()">Отправить транзакцию</button>
 
-        // Функция для отправки транзакции
-        async function sendTransaction() {
-            const transaction = {
-                validUntil: Math.floor(Date.now() / 1000) + 300, // Время истечения транзакции (например, через 5 минут)
-                messages: [
-                    {
-                        address: "EQABa48hjKzg09hN_HjxOic7r8T1PleIy1dRd8NvZ3922MP0", // Адрес получателя
-                        amount: "20000000" // Сумма в наносекундах (нанотоны)
-                    }
-                ]
-            };
+  <!-- Кнопка отключения кошелька -->
+  <button onclick="disconnectWallet()">Отключить кошелек</button>
 
-            try {
-                const result = await tonConnectUI.sendTransaction(transaction);
-                console.log('Результат транзакции:', result);
-            } catch (error) {
-                console.error('Ошибка при отправке транзакции:', error);
-            }
-        }
+  <!-- Подключение скрипта TON Connect UI -->
+  <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
-        // Функция для отключения кошелька
-        async function disconnectWallet() {
-            try {
-                await tonConnectUI.disconnect();
-                console.log('Кошелек отключен');
-            } catch (error) {
-                console.error('Ошибка при отключении кошелька:', error);
-            }
-        }
-    </script>
+  <!-- Инициализация TON Connect UI -->
+  <script>
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: 'https://ppop-production.up.railway.app/tonconnect-manifest.json',
+      buttonRootId: 'ton-connect'
+    });
+
+    async function connectToWallet() {
+      try {
+        const connectedWallet = await tonConnectUI.connectWallet();
+        console.log('Wallet connected:', connectedWallet);
+      } catch (error) {
+        console.error("Error connecting to wallet:", error);
+      }
+    }
+
+    async function sendTransaction() {
+      const transaction = {
+        messages: [
+          {
+            address: "EQABa48hjKzg09hN_HjxOic7r8T1PleIy1dRd8NvZ3922MP0", // адрес получателя
+            amount: "20000000" // сумма в нанотонах
+          }
+        ]
+      };
+
+      try {
+        const result = await tonConnectUI.sendTransaction(transaction);
+        console.log('Transaction sent:', result);
+      } catch (error) {
+        console.error("Error sending transaction:", error);
+      }
+    }
+
+    async function disconnectWallet() {
+      try {
+        await tonConnectUI.disconnect();
+        console.log('Wallet disconnected');
+      } catch (error) {
+        console.error("Error disconnecting wallet:", error);
+      }
+    }
+  </script>
 </body>
 </html>
