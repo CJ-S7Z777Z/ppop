@@ -6,93 +6,165 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Подключение стилей -->
   <style>
-    /* styles.css */
+/* styles.css */
 
 body {
-    margin: 0;
-    padding: 0;
-    background-color: #121212; /* Тёмный фон */
-    color: #ffffff; /* Белый текст */
-    font-family: 'Arial', sans-serif;
-  }
-  
-  .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-  }
-  
+  margin: 0;
+  padding: 0;
+  background-color: #121212; /* Тёмный фон */
+  color: #ffffff; /* Белый текст */
+  font-family: 'Arial', sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+#ton-connect-button-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+}
+
+#ton-connect-button-container.connected {
+  position: static;
+  margin-top: 20px;
+}
+
+#balance-container {
+  margin-top: 100px;
+  text-align: center;
+}
+
+.balance-description {
+  font-size: 14px;
+  color: #bbbbbb;
+}
+
+#actions-container {
+  margin-top: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+.action-button {
+  padding: 15px 30px;
+  background-color: #1e88e5;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.action-button:hover {
+  background-color: #1565c0;
+}
+
+.action-button:active {
+  background-color: #0d47a1;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Стили для модального окна */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #1e1e1e;
+  padding: 30px;
+  border-radius: 10px;
+  position: relative;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.modal-content input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  background-color: #2e2e2e;
+  border: none;
+  border-radius: 5px;
+  color: #ffffff;
+  font-size: 16px;
+}
+
+.modal-content input[type="number"]::placeholder {
+  color: #bbbbbb;
+}
+
+.modal-action-button {
+  padding: 15px 30px;
+  background-color: #43a047;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.modal-action-button:hover {
+  background-color: #388e3c;
+}
+
+.modal-action-button:active {
+  background-color: #2e7d32;
+}
+
+.close-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.close-button:hover {
+  color: #bbbbbb;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 600px) {
   #ton-connect-button-container {
-    position: fixed;
-    top: 20px;
+    top: auto;
+    bottom: 20px;
     right: 20px;
   }
-  
+
   #ton-connect-button-container.connected {
     position: static;
     margin-top: 20px;
   }
-  
-  #balance-container {
-    margin-top: 100px;
-    text-align: center;
-  }
-  
-  .balance-description {
-    font-size: 14px;
-    color: #bbbbbb;
-  }
-  
-  #actions-container {
-    margin-top: 20px;
-    display: flex;
-    gap: 20px;
-  }
-  
-  .action-button {
-    padding: 15px 30px;
-    background-color: #1e88e5;
-    color: #ffffff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .action-button:hover {
-    background-color: #1565c0;
-  }
-  
-  .action-button:active {
-    background-color: #0d47a1;
-  }
-  
-  .hidden {
-    display: none;
-  }
-  
-  /* Адаптация для мобильных устройств */
-  @media (max-width: 600px) {
-    #ton-connect-button-container {
-      top: auto;
-      bottom: 20px;
-      right: 20px;
-    }
-  
-    #ton-connect-button-container.connected {
-      position: static;
-      margin-top: 20px;
-    }
-  }
+}
 
   </style>
 </head>
 <body>
-  <!-- Контейнер для всей страницы -->
   <div class="container">
-
     <!-- Кнопка TON Connect -->
     <div id="ton-connect-button-container">
       <div id="ton-connect"></div>
@@ -110,7 +182,16 @@ body {
       <button class="action-button" id="deposit-button">Пополнить</button>
       <button class="action-button" id="withdraw-button">Вывести</button>
     </div>
+  </div>
 
+  <!-- Модальное окно для пополнения -->
+  <div id="deposit-modal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-button" id="deposit-close-button">&times;</span>
+      <h2>Пополнить баланс</h2>
+      <input type="number" id="deposit-amount" placeholder="Сумма в TON">
+      <button class="modal-action-button" id="deposit-confirm-button">Пополнить</button>
+    </div>
   </div>
 
   <!-- Подключение скрипта TON Connect UI -->
@@ -124,9 +205,17 @@ body {
 // Адрес кошелька приложения для получения средств
 const appWalletAddress = 'UQBDT2vmEdKWRNVcdHiRP3k2JXMsfS5VU-GguXIc2UUBVzah';
 
+// Проверим, что TonWeb доступен
+if (typeof TonWeb === 'undefined') {
+  alert('TonWeb не загружен. Пожалуйста, проверьте подключение TonWeb.');
+}
+
+// Инициализация TonWeb
+const tonweb = new TonWeb();
+
 // Инициализация TON Connect UI
 const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-  manifestUrl: 'https://ppop-production.up.railway.app/tonconnect-manifest.json',
+  manifestUrl: 'https://<YOUR_APP_URL>/tonconnect-manifest.json',
   buttonRootId: 'ton-connect'
 });
 
@@ -137,6 +226,11 @@ const balanceElement = document.getElementById('balance');
 const actionsContainer = document.getElementById('actions-container');
 const depositButton = document.getElementById('deposit-button');
 const withdrawButton = document.getElementById('withdraw-button');
+
+const depositModal = document.getElementById('deposit-modal');
+const depositAmountInput = document.getElementById('deposit-amount');
+const depositConfirmButton = document.getElementById('deposit-confirm-button');
+const depositCloseButton = document.getElementById('deposit-close-button');
 
 // Переменная для хранения адреса кошелька пользователя
 let walletAddress = null;
@@ -173,7 +267,7 @@ async function updateBalance() {
   try {
     // Отправляем запрос на сервер для получения баланса пользователя
     const response = await fetch('/get-balance', {
-      method: 'POST',
+            method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
@@ -192,22 +286,34 @@ async function updateBalance() {
 }
 
 // Обработчик кнопки "Пополнить"
-depositButton.addEventListener('click', async () => {
+depositButton.addEventListener('click', () => {
   if (!walletAddress) return;
+  // Открываем модальное окно для ввода суммы
+  depositModal.classList.remove('hidden');
+});
 
-  const amountInTon = prompt('Введите сумму для пополнения (в TON):');
-  if (!amountInTon || isNaN(amountInTon)) {
+// Обработчик кнопки подтверждения пополнения
+depositConfirmButton.addEventListener('click', async () => {
+  const amountInTon = depositAmountInput.value;
+  if (!amountInTon || isNaN(amountInTon) || parseFloat(amountInTon) <= 0) {
     alert('Пожалуйста, введите корректную сумму.');
     return;
   }
 
   const amountInNanoTon = (parseFloat(amountInTon) * 1e9).toString();
 
-  const payloadString = `deposit:${walletAddress}`;
-  const payloadBase64 = btoa(payloadString);
+  // Создаем Cell для payload
+  const cell = new TonWeb.boc.Cell();
+  cell.bits.writeUtf8(`deposit:${walletAddress}`);
+
+  // Сериализуем Cell в BOC
+  const payloadBytes = cell.toBoc({ idx: false });
+
+  // Кодируем в base64
+  const payloadBase64 = TonWeb.utils.bytesToBase64(payloadBytes);
 
   const transaction = {
-    validUntil: Math.floor(Date.now() / 1000) + 300, // Транзакция действительна 5 минут
+    valid_until: Math.floor(Date.now() / 1000) + 300, // Транзакция действительна 5 минут
     messages: [
       {
         address: appWalletAddress, // Адрес вашего приложения
@@ -221,6 +327,10 @@ depositButton.addEventListener('click', async () => {
     const result = await tonConnectUI.sendTransaction(transaction);
     console.log('Deposit transaction sent:', result);
     alert('Транзакция на пополнение отправлена.');
+    // Закрываем модальное окно
+    depositModal.classList.add('hidden');
+    // Очищаем поле ввода
+    depositAmountInput.value = '';
     // Обновить баланс после небольшой задержки
     setTimeout(updateBalance, 10000); // Задержка 10 секунд
   } catch (error) {
@@ -229,10 +339,28 @@ depositButton.addEventListener('click', async () => {
   }
 });
 
+// Обработчик кнопки закрытия модального окна
+depositCloseButton.addEventListener('click', () => {
+  // Закрываем модальное окно
+  depositModal.classList.add('hidden');
+  // Очищаем поле ввода
+  depositAmountInput.value = '';
+});
+
+// Обработчик нажатия вне модального окна для его закрытия
+window.addEventListener('click', (event) => {
+  if (event.target === depositModal) {
+    depositModal.classList.add('hidden');
+    depositAmountInput.value = '';
+  }
+});
+
 // Обработчик кнопки "Вывести"
 withdrawButton.addEventListener('click', () => {
   alert('Функция вывода пока не реализована.');
 });
+
+
 
   </script>
 </body>
