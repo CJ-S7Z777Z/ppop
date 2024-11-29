@@ -1,2 +1,15 @@
+# railway.toml
+
+[docs]
+  name = "TON Connect App"
+
+[build]
+  builder = "Nixpacks"
+
+[start]
+  cmd = "node server.js"
+  forward_ports = true
+
 [deploy]
-start = "npm install && npm start"
+  num_instances = 1
+  healthcheck_path = "/"
