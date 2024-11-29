@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@tonconnect/ui": "^2.0.9",
+    "body-parser": "^1.20.3",
     "express": "^4.21.1"
   }
 }
