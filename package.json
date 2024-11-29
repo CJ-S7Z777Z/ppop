@@ -1,4 +1,11 @@
 {
+  "name": "ton-connect-app",
+  "version": "1.0.0",
+  "description": "TON Connect Integration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "@tonconnect/ui": "^2.0.9",
     "express": "^4.21.1"
