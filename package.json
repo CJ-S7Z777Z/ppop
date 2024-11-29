@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "@tonconnect/ui": "^2.0.9"
+    "@tonconnect/ui": "^2.0.9",
+    "express": "^4.21.1"
   }
 }
