@@ -1,4 +1,0 @@
-@ton-community/assets-sdk
-axios
-express
-tonweb
