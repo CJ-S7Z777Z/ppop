@@ -1,0 +1,9 @@
+{
+    "manifest_version": 1,
+    "id": "com.example.mytonapp",
+    "name": "My TON App",
+    "description": "An example TON Connect application.",
+    "url": "https://ppop-production.up.railway.app/",
+    "icon_url": "https://cdn-icons-png.flaticon.com/512/4854/4854221.png"
+  }
+  
