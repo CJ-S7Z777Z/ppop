@@ -3,67 +3,236 @@
 <head>
   <meta charset="UTF-8">
   <title>TON Connect Integration</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Подключение стилей -->
+  <style>
+    /* styles.css */
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #121212; /* Тёмный фон */
+    color: #ffffff; /* Белый текст */
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  #ton-connect-button-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+  }
+  
+  #ton-connect-button-container.connected {
+    position: static;
+    margin-top: 20px;
+  }
+  
+  #balance-container {
+    margin-top: 100px;
+    text-align: center;
+  }
+  
+  .balance-description {
+    font-size: 14px;
+    color: #bbbbbb;
+  }
+  
+  #actions-container {
+    margin-top: 20px;
+    display: flex;
+    gap: 20px;
+  }
+  
+  .action-button {
+    padding: 15px 30px;
+    background-color: #1e88e5;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .action-button:hover {
+    background-color: #1565c0;
+  }
+  
+  .action-button:active {
+    background-color: #0d47a1;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  /* Адаптация для мобильных устройств */
+  @media (max-width: 600px) {
+    #ton-connect-button-container {
+      top: auto;
+      bottom: 20px;
+      right: 20px;
+    }
+  
+    #ton-connect-button-container.connected {
+      position: static;
+      margin-top: 20px;
+    }
+  }
+
+  </style>
 </head>
 <body>
-  <h1>Интеграция TON Connect</h1>
+  <!-- Контейнер для всей страницы -->
+  <div class="container">
 
-  <!-- Элемент для кнопки подключения -->
-  <div id="ton-connect"></div>
+    <!-- Кнопка TON Connect -->
+    <div id="ton-connect-button-container">
+      <div id="ton-connect"></div>
+    </div>
 
-  <!-- Пользовательская кнопка подключения -->
-  <button onclick="connectToWallet()">Подключить кошелек</button>
+    <!-- Баланс пользователя -->
+    <div id="balance-container" class="hidden">
+      <h2>Ваш баланс</h2>
+      <p id="balance">0 TON</p>
+      <p class="balance-description">Текущий баланс вашего кошелька.</p>
+    </div>
 
-  <!-- Кнопка отправки транзакции -->
-  <button onclick="sendTransaction()">Отправить транзакцию</button>
+    <!-- Кнопки Пополнить и Вывести -->
+    <div id="actions-container" class="hidden">
+      <button class="action-button" id="deposit-button">Пополнить</button>
+      <button class="action-button" id="withdraw-button">Вывести</button>
+    </div>
 
-  <!-- Кнопка отключения кошелька -->
-  <button onclick="disconnectWallet()">Отключить кошелек</button>
+  </div>
 
   <!-- Подключение скрипта TON Connect UI -->
   <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
-  <!-- Инициализация TON Connect UI -->
+  <!-- Ваш скрипт -->
   <script>
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: 'https://ppop-production.up.railway.app/tonconnect-manifest.json',
-      buttonRootId: 'ton-connect'
+// script.js
+
+// Адрес кошелька приложения для получения средств
+const appWalletAddress = 'UQBDT2vmEdKWRNVcdHiRP3k2JXMsfS5VU-GguXIc2UUBVzah';
+
+// Инициализация TON Connect UI
+const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+  manifestUrl: 'https://ppop-production.up.railway.app/tonconnect-manifest.json',
+  buttonRootId: 'ton-connect'
+});
+
+// Элементы страницы
+const tonConnectButtonContainer = document.getElementById('ton-connect-button-container');
+const balanceContainer = document.getElementById('balance-container');
+const balanceElement = document.getElementById('balance');
+const actionsContainer = document.getElementById('actions-container');
+const depositButton = document.getElementById('deposit-button');
+const withdrawButton = document.getElementById('withdraw-button');
+
+// Переменная для хранения адреса кошелька пользователя
+let walletAddress = null;
+
+// Подписка на события подключения/отключения кошелька
+tonConnectUI.onStatusChange(async (wallet) => {
+  if (wallet) {
+    // Пользователь подключил кошелек
+    walletAddress = wallet.account.address;
+    // Переместить кнопку TON Connect в верх по центру
+    tonConnectButtonContainer.classList.add('connected');
+    // Показать баланс и кнопки
+    balanceContainer.classList.remove('hidden');
+    actionsContainer.classList.remove('hidden');
+    // Получить и отобразить баланс
+    await updateBalance();
+  } else {
+    // Пользователь отключил кошелек
+    walletAddress = null;
+    // Вернуть кнопку на исходное место
+    tonConnectButtonContainer.classList.remove('connected');
+    // Скрыть баланс и кнопки
+    balanceContainer.classList.add('hidden');
+    actionsContainer.classList.add('hidden');
+    // Сбросить баланс
+    balanceElement.textContent = '0 TON';
+  }
+});
+
+// Функция для обновления баланса пользователя
+async function updateBalance() {
+  if (!walletAddress) return;
+
+  try {
+    // Отправляем запрос на сервер для получения баланса пользователя
+    const response = await fetch('/get-balance', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ walletAddress })
     });
-
-    async function connectToWallet() {
-      try {
-        const connectedWallet = await tonConnectUI.connectWallet();
-        console.log('Wallet connected:', connectedWallet);
-      } catch (error) {
-        console.error("Error connecting to wallet:", error);
-      }
+    const data = await response.json();
+    if (data.success) {
+      const balanceInTon = data.balance / 1e9;
+      balanceElement.textContent = `${balanceInTon.toFixed(2)} TON`;
+    } else {
+      alert('Ошибка при загрузке баланса.');
     }
+  } catch (error) {
+    console.error("Error fetching balance:", error);
+  }
+}
 
-    async function sendTransaction() {
-      const transaction = {
-        messages: [
-          {
-            address: "EQABa48hjKzg09hN_HjxOic7r8T1PleIy1dRd8NvZ3922MP0", // адрес получателя
-            amount: "20000000" // сумма в нанотонах
-          }
-        ]
-      };
+// Обработчик кнопки "Пополнить"
+depositButton.addEventListener('click', async () => {
+  if (!walletAddress) return;
 
-      try {
-        const result = await tonConnectUI.sendTransaction(transaction);
-        console.log('Transaction sent:', result);
-      } catch (error) {
-        console.error("Error sending transaction:", error);
+  const amountInTon = prompt('Введите сумму для пополнения (в TON):');
+  if (!amountInTon || isNaN(amountInTon)) {
+    alert('Пожалуйста, введите корректную сумму.');
+    return;
+  }
+
+  const amountInNanoTon = (parseFloat(amountInTon) * 1e9).toString();
+
+  const payloadString = `deposit:${walletAddress}`;
+  const payloadBase64 = btoa(payloadString);
+
+  const transaction = {
+    validUntil: Math.floor(Date.now() / 1000) + 300, // Транзакция действительна 5 минут
+    messages: [
+      {
+        address: appWalletAddress, // Адрес вашего приложения
+        amount: amountInNanoTon, // Сумма для пополнения
+        payload: payloadBase64 // Добавляем метку с адресом кошелька пользователя
       }
-    }
+    ]
+  };
 
-    async function disconnectWallet() {
-      try {
-        await tonConnectUI.disconnect();
-        console.log('Wallet disconnected');
-      } catch (error) {
-        console.error("Error disconnecting wallet:", error);
-      }
-    }
+  try {
+    const result = await tonConnectUI.sendTransaction(transaction);
+    console.log('Deposit transaction sent:', result);
+    alert('Транзакция на пополнение отправлена.');
+    // Обновить баланс после небольшой задержки
+    setTimeout(updateBalance, 10000); // Задержка 10 секунд
+  } catch (error) {
+    console.error("Error sending deposit transaction:", error);
+    alert('Ошибка при отправке транзакции.');
+  }
+});
+
+// Обработчик кнопки "Вывести"
+withdrawButton.addEventListener('click', () => {
+  alert('Функция вывода пока не реализована.');
+});
+
   </script>
 </body>
 </html>
