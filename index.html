@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Подключение TON Кошелька</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+        }
+        #connect-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #wallet-address {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Подключите ваш TON Кошелек</h1>
+    <button id="connect-button">Подключить Кошелек</button>
+    <div id="wallet-address"></div>
+
+    <!-- Подключение TON Connect SDK -->
+    <script src="https://unpkg.com/@tonconnect/ui@2.0.1/dist/tonconnect-ui.min.js"></script>
+    <script>
+        // Инициализация TON Connect
+        const tonConnect = new TonConnectUI({
+            manifestUrl: 'https://ppop-production.up.railway.app/manifest.json', // Замените на URL вашего манифеста
+            appUrl: 'https://ppop-production.up.railway.app/' // Замените на URL вашего сайта
+        });
+
+        const connectButton = document.getElementById('connect-button');
+        const walletAddressDiv = document.getElementById('wallet-address');
+
+        connectButton.addEventListener('click', async () => {
+            try {
+                const wallet = await tonConnect.requestConnection();
+                const address = wallet.address;
+                walletAddressDiv.textContent = `Подключенный адрес: ${address}`;
+            } catch (error) {
+                console.error('Ошибка подключения:', error);
+                alert('Не удалось подключиться к кошельку.');
+            }
+        });
+    </script>
+</body>
+</html>
