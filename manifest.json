@@ -1,7 +1,7 @@
 {
     "name": "My TON App",
     "description": "Пример приложения для подключения TON кошелька",
-    "url": "https://your-website.com",
+    "url": "https://ppop-production.up.railway.app/",
     "icons": {
         "64": "https://your-website.com/icon.png"
     }
