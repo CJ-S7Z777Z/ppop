@@ -2,51 +2,64 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Подключение TON Кошелька</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 100px;
-        }
-        #connect-button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        #wallet-address {
-            margin-top: 20px;
-            font-weight: bold;
-        }
-    </style>
+    <title>Пример TON Connect</title>
+    <!-- Подключите стили TON Connect UI -->
+    <link rel="stylesheet" href="https://unpkg.com/@tonconnect/ui@latest/dist/style.css">
 </head>
 <body>
-    <h1>Подключите ваш TON Кошелек</h1>
-    <button id="connect-button">Подключить Кошелек</button>
-    <div id="wallet-address"></div>
+    <!-- Контейнер для кнопки TON Connect -->
+    <div id="ton-connect"></div>
 
-    <!-- Подключение TON Connect SDK -->
-    <script src="https://unpkg.com/@tonconnect/ui@2.0.1/dist/tonconnect-ui.min.js"></script>
+    <!-- Подключаем библиотеку TON Connect UI из CDN -->
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+
     <script>
-        // Инициализация TON Connect
-        const tonConnect = new TonConnectUI({
-            manifestUrl: 'https://ppop-production.up.railway.app/manifest.json', // Замените на URL вашего манифеста
-            appUrl: 'https://ppop-production.up.railway.app/' // Замените на URL вашего сайта
+        // Инициализация TON Connect UI
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://ppop-production.up.railway.app/tonconnect-manifest.json', // Замените на URL вашего manifest.json
+            buttonRootId: 'ton-connect' // ID элемента, куда будет вставлена кнопка
         });
 
-        const connectButton = document.getElementById('connect-button');
-        const walletAddressDiv = document.getElementById('wallet-address');
-
-        connectButton.addEventListener('click', async () => {
+        // Функция для подключения к кошельку
+        async function connectToWallet() {
             try {
-                const wallet = await tonConnect.requestConnection();
-                const address = wallet.address;
-                walletAddressDiv.textContent = `Подключенный адрес: ${address}`;
+                const connectedWallet = await tonConnectUI.connectWallet();
+                // Действия после успешного подключения
+                console.log('Подключенный кошелек:', connectedWallet);
             } catch (error) {
-                console.error('Ошибка подключения:', error);
-                alert('Не удалось подключиться к кошельку.');
+                console.error('Ошибка при подключении к кошельку:', error);
             }
-        });
+        }
+
+        // Функция для отправки транзакции
+        async function sendTransaction() {
+            const transaction = {
+                validUntil: Math.floor(Date.now() / 1000) + 300, // Время истечения транзакции (например, через 5 минут)
+                messages: [
+                    {
+                        address: "EQABa48hjKzg09hN_HjxOic7r8T1PleIy1dRd8NvZ3922MP0", // Адрес получателя
+                        amount: "20000000" // Сумма в наносекундах (нанотоны)
+                    }
+                ]
+            };
+
+            try {
+                const result = await tonConnectUI.sendTransaction(transaction);
+                console.log('Результат транзакции:', result);
+            } catch (error) {
+                console.error('Ошибка при отправке транзакции:', error);
+            }
+        }
+
+        // Функция для отключения кошелька
+        async function disconnectWallet() {
+            try {
+                await tonConnectUI.disconnect();
+                console.log('Кошелек отключен');
+            } catch (error) {
+                console.error('Ошибка при отключении кошелька:', error);
+            }
+        }
     </script>
 </body>
 </html>
