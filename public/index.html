@@ -141,7 +141,7 @@ body {
     const recipientAddress = 'EQBDT2vmEdKWRNVcdHiRP3k2JXMsfS5VU-GguXIc2UUBV2tk'; // Исправленный адрес, начинающийся с 'EQ'
 
     // Укажите размер комиссии за транзакцию (в TON)
-    const commissionInTon = 0.02; // Например, комиссия 0.12 TON
+    const commissionInTon = 0.02; // Например, комиссия 0.02 TON
 
     // Подписка на события подключения/отключения кошелька
     tonConnectUI.onStatusChange(async (wallet) => {
@@ -215,9 +215,9 @@ body {
       try {
         const result = await tonConnectUI.sendTransaction(transaction);
         console.log('Транзакция на пополнение отправлена:', result);
-        alert('Транзакция на пополнение отправлена.');
-        // Обновить баланс после небольшой задержки
-        setTimeout(updateBalance, 5000);
+        alert('Транзакция успешно отправлена.');
+        // Обновить баланс после отправки транзакции
+        await updateBalance();
       } catch (error) {
         console.error("Ошибка при отправке транзакции на пополнение:", error);
         alert('Ошибка при отправке транзакции.');
