@@ -4,88 +4,94 @@
   <meta charset="UTF-8">
   <title>TON Connect Integration</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Подключение стилей -->
+
+  <!-- Стили -->
   <style>
-    /* styles.css */
+    /* стили */
 
-body {
-  margin: 0;
-  padding: 0;
-  background-color: #121212; /* Тёмный фон */
-  color: #ffffff; /* Белый текст */
-  font-family: 'Arial', sans-serif;
-}
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #121212; /* Тёмный фон */
+      color: #ffffff; /* Белый текст */
+      font-family: 'Arial', sans-serif;
+    }
 
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-}
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
 
-#ton-connect-button-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-}
+    #ton-connect-button-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+    }
 
-#ton-connect-button-container.connected {
-  position: static;
-  margin-top: 20px;
-}
+    #ton-connect-button-container.connected {
+      position: static;
+      margin-top: 20px;
+    }
 
-#balance-container {
-  margin-top: 100px;
-  text-align: center;
-}
+    #balance-container {
+      margin-top: 100px;
+      text-align: center;
+    }
 
-.balance-description {
-  font-size: 14px;
-  color: #bbbbbb;
-}
+    .balance-description {
+      font-size: 14px;
+      color: #bbbbbb;
+    }
 
-#actions-container {
-  margin-top: 20px;
-  display: flex;
-  gap: 20px;
-}
+    #site-balance-container {
+      margin-top: 20px;
+      text-align: center;
+    }
 
-.action-button {
-  padding: 15px 30px;
-  background-color: #1e88e5;
-  color: #ffffff;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
+    #actions-container {
+      margin-top: 20px;
+      display: flex;
+      gap: 20px;
+    }
 
-.action-button:hover {
-  background-color: #1565c0;
-}
+    .action-button {
+      padding: 15px 30px;
+      background-color: #1e88e5;
+      color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
 
-.action-button:active {
-  background-color: #0d47a1;
-}
+    .action-button:hover {
+      background-color: #1565c0;
+    }
 
-.hidden {
-  display: none;
-}
+    .action-button:active {
+      background-color: #0d47a1;
+    }
 
-/* Адаптация для мобильных устройств */
-@media (max-width: 600px) {
-  #ton-connect-button-container {
-    top: auto;
-    bottom: 20px;
-    right: 20px;
-  }
+    .hidden {
+      display: none;
+    }
 
-  #ton-connect-button-container.connected {
-    position: static;
-    margin-top: 20px;
-  }
-}
+    /* Адаптация для мобильных устройств */
+    @media (max-width: 600px) {
+      #ton-connect-button-container {
+        top: auto;
+        bottom: 20px;
+        right: 20px;
+      }
+
+      #ton-connect-button-container.connected {
+        position: static;
+        margin-top: 20px;
+      }
+    }
 
   </style>
 </head>
@@ -100,9 +106,15 @@ body {
 
     <!-- Баланс пользователя -->
     <div id="balance-container" class="hidden">
-      <h2>Ваш баланс</h2>
+      <h2>Ваш баланс в кошельке</h2>
       <p id="balance">0 TON</p>
       <p class="balance-description">Текущий баланс вашего кошелька.</p>
+    </div>
+
+    <!-- Баланс на сайте -->
+    <div id="site-balance-container" class="hidden">
+      <h2>Ваш баланс на сайте</h2>
+      <p id="site-balance">0 TON</p>
     </div>
 
     <!-- Кнопки Пополнить и Вывести -->
@@ -113,16 +125,15 @@ body {
 
   </div>
 
+  <!-- Подключение библиотек -->
   <script src="https://cdn.jsdelivr.net/npm/tonweb@0.0.44/dist/tonweb.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
-  <!-- Ваш скрипт -->
+  <!-- Скрипт -->
   <script>
-    // script.js
-
     // Инициализация TON Connect UI
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: 'https://ppop-production.up.railway.app/tonconnect-manifest.json',
+      manifestUrl: '/tonconnect-manifest.json',
       buttonRootId: 'ton-connect'
     });
 
@@ -130,66 +141,82 @@ body {
     const tonConnectButtonContainer = document.getElementById('ton-connect-button-container');
     const balanceContainer = document.getElementById('balance-container');
     const balanceElement = document.getElementById('balance');
+    const siteBalanceContainer = document.getElementById('site-balance-container');
+    const siteBalanceElement = document.getElementById('site-balance');
     const actionsContainer = document.getElementById('actions-container');
     const depositButton = document.getElementById('deposit-button');
     const withdrawButton = document.getElementById('withdraw-button');
 
-    // Переменная для хранения адреса кошелька пользователя
+    // Переменные
     let walletAddress = null;
+    let siteBalance = 0;
 
-    // Укажите адрес кошелька, на который будут зачисляться TON и комиссия
-    const recipientAddress = 'EQBDT2vmEdKWRNVcdHiRP3k2JXMsfS5VU-GguXIc2UUBV2tk'; // Исправленный адрес, начинающийся с 'EQ'
+    // Укажите адрес кошелька приложения
+    const recipientAddress = 'EQBDT2vmEdKWRNVcdHiRP3k2JXMsfS5VU-GguXIc2UUBV2tk'; // Замените на ваш адрес
 
     // Укажите размер комиссии за транзакцию (в TON)
     const commissionInTon = 0.02; // Например, комиссия 0.12 TON
+
+    // Инициализация TonWeb с провайдером
+    const tonweb = new TonWeb(new TonWeb.HttpProvider('https://toncenter.com/api/v2/jsonRPC'));
 
     // Подписка на события подключения/отключения кошелька
     tonConnectUI.onStatusChange(async (wallet) => {
       if (wallet) {
         // Пользователь подключил кошелек
         walletAddress = wallet.account.address;
-        // Переместить кнопку TON Connect вверх по центру
         tonConnectButtonContainer.classList.add('connected');
-        // Показать баланс и кнопки
         balanceContainer.classList.remove('hidden');
+        siteBalanceContainer.classList.remove('hidden');
         actionsContainer.classList.remove('hidden');
-        // Получить и отобразить баланс
-        await updateBalance();
+        await updateBalances();
       } else {
         // Пользователь отключил кошелек
         walletAddress = null;
-        // Вернуть кнопку на исходное место
         tonConnectButtonContainer.classList.remove('connected');
-        // Скрыть баланс и кнопки
         balanceContainer.classList.add('hidden');
+        siteBalanceContainer.classList.add('hidden');
         actionsContainer.classList.add('hidden');
-        // Сбросить баланс
         balanceElement.textContent = '0 TON';
+        siteBalanceElement.textContent = '0 TON';
       }
     });
 
-    // Функция для обновления баланса
-    async function updateBalance() {
+    // Функция для обновления балансов
+    async function updateBalances() {
       if (!walletAddress) return;
 
       try {
-        // Инициализируем TonWeb с указанием провайдера
-        const tonweb = new TonWeb(new TonWeb.HttpProvider('https://toncenter.com/api/v2/jsonRPC'));
-
-        // Используем TonWeb для получения баланса
+        // Получаем баланс кошелька пользователя
         const balance = await tonweb.getBalance(walletAddress);
         const balanceInTon = balance / 1e9;
         balanceElement.textContent = `${balanceInTon.toFixed(2)} TON`;
+
+        // Получаем баланс на сайте с сервера
+        const response = await fetch('/get-balance', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ walletAddress })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          siteBalance = data.balance / 1e9; // Преобразуем из нанотон в TON
+          siteBalanceElement.textContent = `${siteBalance.toFixed(2)} TON`;
+        } else {
+          console.error('Ошибка при получении баланса на сайте:', data.message);
+        }
       } catch (error) {
-        console.error("Ошибка при получении баланса:", error);
+        console.error("Ошибка при обновлении балансов:", error);
       }
     }
 
     // Обработчик кнопки "Пополнить"
-    depositButton.addEventListener('click', async () => {
+    depositButton.addEventListener('click', async () =>{
       if (!walletAddress) return;
 
-      // Информируем пользователя о комиссии
       const amountInTon = prompt(`Введите сумму для пополнения (в TON). Комиссия составит ${commissionInTon} TON и будет добавлена к сумме пополнения.`);
 
       if (!amountInTon || isNaN(amountInTon)) {
@@ -197,17 +224,20 @@ body {
         return;
       }
 
-      // Преобразуем суммы в nanoTON (1 TON = 1e9 nanoTON)
       const userAmountInNanoTon = parseFloat(amountInTon) * 1e9;
       const commissionInNanoTon = commissionInTon * 1e9;
       const totalAmountInNanoTon = userAmountInNanoTon + commissionInNanoTon;
 
+      // Генерируем payload с идентификатором пользователя
+      const payload = `deposit:${walletAddress}`;
+      const payloadBase64 = btoa(payload);
+
       const transaction = {
-        validUntil: Math.floor(Date.now() / 1000) + 5 * 60, // транзакция действительна 5 минут
         messages: [
           {
-            address: recipientAddress, // Отправляем на указанный адрес
-            amount: totalAmountInNanoTon.toString() // Общая сумма (пополнение + комиссия)
+            address: recipientAddress,
+            amount: totalAmountInNanoTon.toString(),
+            payload: payloadBase64
           }
         ]
       };
@@ -216,8 +246,29 @@ body {
         const result = await tonConnectUI.sendTransaction(transaction);
         console.log('Транзакция на пополнение отправлена:', result);
         alert('Транзакция на пополнение отправлена.');
-        // Обновить баланс после небольшой задержки
-        setTimeout(updateBalance, 5000);
+
+        // Отправляем на сервер информацию о пополнении
+        const response = await fetch('/update-balance', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            walletAddress,
+            amount: userAmountInNanoTon
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          siteBalance = data.balance / 1e9; // Преобразуем из нанотон в TON
+          siteBalanceElement.textContent = `${siteBalance.toFixed(2)} TON`;
+        } else {
+          console.error('Ошибка при обновлении баланса на сайте:', data.message);
+        }
+
+        // Обновляем баланс кошелька пользователя
+        await updateBalances();
       } catch (error) {
         console.error("Ошибка при отправке транзакции на пополнение:", error);
         alert('Ошибка при отправке транзакции.');
@@ -225,8 +276,48 @@ body {
     });
 
     // Обработчик кнопки "Вывести"
-    withdrawButton.addEventListener('click', () => {
-      alert('Функция вывода пока не реализована.');
+    withdrawButton.addEventListener('click', async () => {
+      if (!walletAddress) return;
+
+      const amountInTon = prompt('Введите сумму для вывода (в TON).');
+
+      if (!amountInTon || isNaN(amountInTon)) {
+        alert('Пожалуйста, введите корректную сумму.');
+        return;
+      }
+
+      const amountInNanoTon = parseFloat(amountInTon) * 1e9;
+
+      if (amountInNanoTon > siteBalance * 1e9) {
+        alert('Недостаточно средств на вашем балансе на сайте.');
+        return;
+      }
+
+      try {
+        // Отправляем запрос на сервер для обработки вывода
+        const response = await fetch('/withdraw', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            walletAddress,
+            amount: amountInNanoTon
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          siteBalance = data.balance / 1e9; // Преобразуем из нанотон в TON
+          siteBalanceElement.textContent = `${siteBalance.toFixed(2)} TON`;
+          alert('Заявка на вывод принята. Средства будут переведены в ближайшее время.');
+        } else {
+          alert(`Ошибка при выводе средств: ${data.message}`);
+        }
+      } catch (error) {
+        console.error('Ошибка при выводе средств:', error);
+        alert('Ошибка при обработке запроса на вывод.');
+      }
     });
 
   </script>
