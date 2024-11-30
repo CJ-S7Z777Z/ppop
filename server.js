@@ -4,7 +4,7 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const TonWeb = require('tonweb');
-const tonweb = new TonWeb();
+const tonweb = new TonWeb(new TonWeb.HttpProvider('https://toncenter.com/api/v2/jsonRPC'));
 const app = express();
 
 // Порт сервера
@@ -53,26 +53,26 @@ async function monitorIncomingTransactions() {
     console.log('Starting to monitor incoming transactions...');
 
     // Получаем информацию о последнем обработанном блоке (храним в памяти)
-    let lastSeqno = null;
+    let lastTransactionLt = null;
 
     // Периодически опрашиваем блокчейн
     setInterval(async () => {
       try {
         // Получаем данные о кошельке приложения
-        const transactions = await tonweb.provider.getTransactions(appWalletAddress, 30, lastSeqno);
+        const transactions = await tonweb.provider.getTransactions(appWalletAddress, 30, lastTransactionLt);
 
         for (const tx of transactions) {
           // Если уже обработали эту транзакцию, пропускаем
-          if (lastSeqno && tx.seqno <= lastSeqno) continue;
+          if (lastTransactionLt && BigInt(tx.transaction_id.lt) <= BigInt(lastTransactionLt)) continue;
 
-          // Обновляем lastSeqno
-          lastSeqno = tx.seqno;
+          // Обновляем lastTransactionLt
+          lastTransactionLt = tx.transaction_id.lt;
 
           // Проверяем входящие транзакции
           if (tx.in_msg && tx.in_msg.source) {
             const fromAddress = tx.in_msg.source;
             const amount = parseInt(tx.in_msg.value);
-            const payload = tx.in_msg.msg_data && tx.in_msg.msg_data.body;
+            const payload = tx.in_msg.message;
 
             // Пытаемся декодировать payload
             let decodedPayload = '';
@@ -82,7 +82,7 @@ async function monitorIncomingTransactions() {
 
             // Проверяем, содержит ли payload идентификатор пользователя
             if (decodedPayload.startsWith('deposit:')) {
-              const userWalletAddress = decodedPayload.replace('deposit:', '');
+              const userWalletAddress = decodedPayload.replace('deposit:', '').trim();
 
               // Обновляем баланс пользователя
               userBalances[userWalletAddress] = (userBalances[userWalletAddress] || 0) + amount;
