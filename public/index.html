@@ -138,7 +138,7 @@ const withdrawButton = document.getElementById('withdraw-button');
 let walletAddress = null;
 
 // Укажите адрес кошелька, на который будут зачисляться TON и комиссия
-const recipientAddress = 'UQBDT2vmEdKWRNVcdHiRP3k2JXMsfS5VU-GguXIc2UUBVzah'; // Замените 'EQ...' на нужный адрес
+const recipientAddress = 'UQBDT2vmEdKWRNVcdHiRP3k2JXMsfS5VU-GguXIc2UUBVzah'; // Замените 'EQC...' на нужный адрес
 
 // Укажите размер комиссии за транзакцию (в TON)
 const commissionInTon = 0.12; // Например, комиссия 1 TON
@@ -195,16 +195,43 @@ depositButton.addEventListener('click', async () => {
     return;
   }
 
+  // Проверяем, что сумма положительная
+  if (parseFloat(amountInTon) <= 0) {
+    alert('Сумма должна быть больше 0.');
+    return;
+  }
+
   // Преобразуем суммы в nanoTON (1 TON = 1e9 nanoTON)
   const userAmountInNanoTon = parseFloat(amountInTon) * 1e9;
   const commissionInNanoTon = commissionInTon * 1e9;
   const totalAmountInNanoTon = userAmountInNanoTon + commissionInNanoTon;
 
+  // Проверяем, что у пользователя достаточно баланса
+  try {
+    const tonweb = new TonWeb();
+    const balance = await tonweb.getBalance(walletAddress);
+    if (balance < totalAmountInNanoTon) {
+      alert('Недостаточно средств на балансе для совершения транзакции с учетом комиссии.');
+      return;
+    }
+  } catch (error) {
+    console.error("Ошибка при проверке баланса:", error);
+    alert('Не удалось проверить баланс.');
+    return;
+  }
+
+  // Генерируем timestamp на 5 минут вперед
+  const currentTimeSeconds = Math.floor(Date.now() / 1000);
+  const validUntil = currentTimeSeconds + 300; // Действительно в течение 5 минут
+
   const transaction = {
+    valid_until: validUntil,
     messages: [
       {
         address: recipientAddress, // Отправляем на указанный адрес
-        amount: totalAmountInNanoTon.toString() // Общая сумма (пополнение + комиссия)
+        amount: totalAmountInNanoTon.toString(), // Общая сумма (пополнение + комиссия)
+        payload: null, // Оставляем null, если нет дополнительных данных
+        stateInit: null // Оставляем null, если нет данных для инициализации состояния
       }
     ]
   };
@@ -225,7 +252,6 @@ depositButton.addEventListener('click', async () => {
 withdrawButton.addEventListener('click', () => {
   alert('Функция вывода пока не реализована.');
 });
-
 
   </script>
 </body>
