@@ -8,7 +8,7 @@
   <style>
     /* styles.css */
 
-    body {
+body {
   margin: 0;
   padding: 0;
   background-color: #121212; /* Тёмный фон */
@@ -44,13 +44,6 @@
   color: #bbbbbb;
 }
 
-#wallet-address {
-  font-size: 14px;
-  color: #cccccc;
-  word-break: break-all;
-  margin-top: 10px;
-}
-
 #actions-container {
   margin-top: 20px;
   display: flex;
@@ -78,91 +71,6 @@
 
 .hidden {
   display: none;
-}
-
-/* Модальное окно */
-.modal {
-  display: none; /* Скрыто по умолчанию */
-  position: fixed;
-  z-index: 100; /* Над другими элементами */
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto; /* Включить прокрутку, если необходимо */
-  background-color: rgba(0, 0, 0, 0.5); /* Чёрный с прозрачностью */
-}
-
-.modal-content {
-  background-color: #1e1e1e;
-  margin: 15% auto; /* 15% сверху и внизу, центрирование */
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%; /* Ширина модального окна */
-  max-width: 400px;
-  color: #fff;
-  border-radius: 5px;
-}
-
-.close-button {
-  color: #aaa;
-  float: right;
-  font-size: 24px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.close-button:hover,
-.close-button:focus {
-  color: #fff;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.suggested-amounts {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.suggested-amount-button {
-  padding: 10px 15px;
-  background-color: #2e7d32;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.suggested-amount-button:hover {
-  background-color: #1b5e20;
-}
-
-#deposit-amount-input {
-  width: calc(100% - 20px);
-  padding: 10px;
-  font-size: 16px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-#confirm-deposit-button {
-  padding: 12px 20px;
-  background-color: #1e88e5;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-#confirm-deposit-button:hover {
-  background-color: #1565c0;
-}
-
-#confirm-deposit-button:active {
-  background-color: #0d47a1;
 }
 
 /* Адаптация для мобильных устройств */
@@ -195,7 +103,6 @@
       <h2>Ваш баланс</h2>
       <p id="balance">0 TON</p>
       <p class="balance-description">Текущий баланс вашего кошелька.</p>
-      <p id="wallet-address"></p>
     </div>
 
     <!-- Кнопки Пополнить и Вывести -->
@@ -206,230 +113,119 @@
 
   </div>
 
-  <!-- Модальное окно для пополнения -->
-  <div id="deposit-modal" class="modal hidden">
-    <div class="modal-content">
-      <span class="close-button">&times;</span>
-      <h2>Введите сумму для пополнения</h2>
-      <div class="suggested-amounts">
-        <button class="suggested-amount-button">1</button>
-        <button class="suggested-amount-button">5</button>
-        <button class="suggested-amount-button">10</button>
-        <button class="suggested-amount-button">20</button>
-      </div>
-      <input type="number" id="deposit-amount-input" placeholder="Сумма в TON" min="0" step="0.01">
-      <button id="confirm-deposit-button">Пополнить</button>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/tonweb@0.0.44/dist/tonweb.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tonweb@0.0.44/dist/tonweb.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
 
   <!-- Ваш скрипт -->
   <script>
-    // Инициализация TON Connect UI
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: '/tonconnect-manifest.json',
-      buttonRootId: 'ton-connect'
-    });
+// script.js
 
-    // Элементы страницы
-    const tonConnectButtonContainer = document.getElementById('ton-connect-button-container');
-    const balanceContainer = document.getElementById('balance-container');
-    const balanceElement = document.getElementById('balance');
-    const actionsContainer = document.getElementById('actions-container');
-    const depositButton = document.getElementById('deposit-button');
-    const withdrawButton = document.getElementById('withdraw-button');
-    const walletAddressElement = document.getElementById('wallet-address');
+// Инициализация TON Connect UI
+const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+  manifestUrl: 'https://ppop-production.up.railway.app/tonconnect-manifest.json',
+  buttonRootId: 'ton-connect'
+});
 
-    // Модальное окно пополнения
-    const depositModal = document.getElementById('deposit-modal');
-    const depositAmountInput = document.getElementById('deposit-amount-input');
-    const confirmDepositButton = document.getElementById('confirm-deposit-button');
-    const closeDepositModalButton = depositModal.querySelector('.close-button');
-    const suggestedAmountButtons = document.querySelectorAll('.suggested-amount-button');
+// Элементы страницы
+const tonConnectButtonContainer = document.getElementById('ton-connect-button-container');
+const balanceContainer = document.getElementById('balance-container');
+const balanceElement = document.getElementById('balance');
+const actionsContainer = document.getElementById('actions-container');
+const depositButton = document.getElementById('deposit-button');
+const withdrawButton = document.getElementById('withdraw-button');
 
-    // Переменная для хранения адреса кошелька пользователя
-    let walletAddress = null;
+// Переменная для хранения адреса кошелька пользователя
+let walletAddress = null;
 
-    // Укажите адрес кошелька приложения
-    const appWalletAddress = 'UQBDT2vmEdKWRNVcdHiRP3k2JXMsfS5VU-GguXIc2UUBVzah';
+// Укажите адрес кошелька, на который будут зачисляться TON и комиссия
+const recipientAddress = 'UQBDT2vmEdKWRNVcdHiRP3k2JXMsfS5VU-GguXIc2UUBVzah'; // Замените 'EQ...' на нужный адрес
 
-    // Укажите размер комиссии за транзакцию (в TON)
-    const commissionInTon = 0.12;
+// Укажите размер комиссии за транзакцию (в TON)
+const commissionInTon = 0.12; // Например, комиссия 1 TON
 
-    // Инициализация TonWeb с HTTP-провайдером TonCenter
-    const tonWebProvider = new TonWeb.HttpProvider('https://toncenter.com/api/v2/jsonRPC');
-    const tonweb = new TonWeb(tonWebProvider);
+// Подписка на события подключения/отключения кошелька
+tonConnectUI.onStatusChange(async (wallet) => {
+  if (wallet) {
+    // Пользователь подключил кошелек
+    walletAddress = wallet.account.address;
+    // Переместить кнопку TON Connect вверх по центру
+    tonConnectButtonContainer.classList.add('connected');
+    // Показать баланс и кнопки
+    balanceContainer.classList.remove('hidden');
+    actionsContainer.classList.remove('hidden');
+    // Получить и отобразить баланс
+    await updateBalance();
+  } else {
+    // Пользователь отключил кошелек
+    walletAddress = null;
+    // Вернуть кнопку на исходное место
+    tonConnectButtonContainer.classList.remove('connected');
+    // Скрыть баланс и кнопки
+    balanceContainer.classList.add('hidden');
+    actionsContainer.classList.add('hidden');
+    // Сбросить баланс
+    balanceElement.textContent = '0 TON';
+  }
+});
 
-    // Подписка на события подключения/отключения кошелька
-    tonConnectUI.onStatusChange(async (wallet) => {
-      if (wallet) {
-        // Пользователь подключил кошелек
-        walletAddress = wallet.account.address;
-        // Переместить кнопку TON Connect вверх по центру
-        tonConnectButtonContainer.classList.add('connected');
-        // Показать баланс и кнопки
-        balanceContainer.classList.remove('hidden');
-        actionsContainer.classList.remove('hidden');
-        // Отобразить адрес кошелька
-        walletAddressElement.textContent = `Адрес кошелька: ${walletAddress}`;
-        // Получить и отобразить баланс
-        await updateBalance();
-      } else {
-        // Пользователь отключил кошелек
-        walletAddress = null;
-        // Вернуть кнопку на исходное место
-        tonConnectButtonContainer.classList.remove('connected');
-        // Скрыть баланс и кнопки
-        balanceContainer.classList.add('hidden');
-        actionsContainer.classList.add('hidden');
-        // Сбросить баланс и адрес
-        balanceElement.textContent = '0 TON';
-        walletAddressElement.textContent = '';
+// Функция для обновления баланса
+async function updateBalance() {
+  if (!walletAddress) return;
+
+  try {
+    // Используем TonWeb для получения баланса
+    const tonweb = new TonWeb();
+    const balance = await tonweb.getBalance(walletAddress);
+    const balanceInTon = balance / 1e9;
+    balanceElement.textContent = `${balanceInTon.toFixed(2)} TON`;
+  } catch (error) {
+    console.error("Ошибка при получении баланса:", error);
+  }
+}
+
+// Обработчик кнопки "Пополнить"
+depositButton.addEventListener('click', async () => {
+  if (!walletAddress) return;
+
+  // Информируем пользователя о комиссии
+  const amountInTon = prompt(`Введите сумму для пополнения (в TON). Комиссия составит ${commissionInTon} TON и будет добавлена к сумме пополнения.`);
+
+  if (!amountInTon || isNaN(amountInTon)) {
+    alert('Пожалуйста, введите корректную сумму.');
+    return;
+  }
+
+  // Преобразуем суммы в nanoTON (1 TON = 1e9 nanoTON)
+  const userAmountInNanoTon = parseFloat(amountInTon) * 1e9;
+  const commissionInNanoTon = commissionInTon * 1e9;
+  const totalAmountInNanoTon = userAmountInNanoTon + commissionInNanoTon;
+
+  const transaction = {
+    messages: [
+      {
+        address: recipientAddress, // Отправляем на указанный адрес
+        amount: totalAmountInNanoTon.toString() // Общая сумма (пополнение + комиссия)
       }
-    });
+    ]
+  };
 
-    // Функция для обновления баланса
-    async function updateBalance() {
-      if (!walletAddress) return;
+  try {
+    const result = await tonConnectUI.sendTransaction(transaction);
+    console.log('Транзакция на пополнение отправлена:', result);
+    alert('Транзакция на пополнение отправлена.');
+    // Обновить баланс после небольшой задержки
+    setTimeout(updateBalance, 5000);
+  } catch (error) {
+    console.error("Ошибка при отправке транзакции на пополнение:", error);
+    alert('Ошибка при отправке транзакции.');
+  }
+});
 
-      try {
-        // Запрашиваем баланс пользователя с сервера
-        const response = await fetch('/get-balance', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ walletAddress })
-        });
-        const data = await response.json();
+// Обработчик кнопки "Вывести"
+withdrawButton.addEventListener('click', () => {
+  alert('Функция вывода пока не реализована.');
+});
 
-        if (data.success) {
-          const balanceInNanoTon = data.balance;
-          const balanceInTon = balanceInNanoTon / 1e9;
-
-          // Получаем курс TON к USD
-          const apiResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd');
-          const priceData = await apiResponse.json();
-          const tonPriceInUsd = priceData['the-open-network'].usd;
-          const balanceInUsd = balanceInTon * tonPriceInUsd;
-
-          balanceElement.textContent = `${balanceInTon.toFixed(2)} TON (${balanceInUsd.toFixed(2)} USD)`;
-        } else {
-          balanceElement.textContent = '0 TON';
-          alert('Не удалось получить баланс.');
-        }
-      } catch (error) {
-        console.error("Ошибка при получении баланса или курса:", error);
-        alert('Не удалось проверить баланс.');
-      }
-    }
-
-    // Обработчик кнопки "Пополнить"
-    depositButton.addEventListener('click', async () => {
-      if (!walletAddress) return;
-
-      // Открываем модальное окно
-      depositModal.classList.remove('hidden');
-      depositModal.style.display = 'block';
-    });
-
-    // Обработчик для закрытия модального окна
-    closeDepositModalButton.addEventListener('click', () => {
-      depositModal.classList.add('hidden');
-      depositModal.style.display = 'none';
-      depositAmountInput.value = '';
-    });
-
-    // Закрытие модального окна при клике вне контента
-    window.addEventListener('click', (event) => {
-      if (event.target == depositModal) {
-        depositModal.classList.add('hidden');
-        depositModal.style.display = 'none';
-        depositAmountInput.value = '';
-      }
-    });
-
-    // Обработчик для выбора подсказок суммы
-    suggestedAmountButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        depositAmountInput.value = button.textContent;
-      });
-    });
-
-    // Обработчик для подтверждения пополнения
-    confirmDepositButton.addEventListener('click', async () => {
-      const amountInTon = depositAmountInput.value;
-
-      if (!amountInTon || isNaN(amountInTon)) {
-        alert('Пожалуйста, введите корректную сумму.');
-        return;
-      }
-
-      // Проверяем, что сумма положительная
-      if (parseFloat(amountInTon) <= 0) {
-        alert('Сумма должна быть больше 0.');
-        return;
-      }
-
-      // Преобразуем суммы в nanoTON (1 TON = 1e9 nanoTON)
-      const userAmountInNanoTon = parseFloat(amountInTon) * 1e9;
-      const commissionInNanoTon = commissionInTon * 1e9;
-      const totalAmountInNanoTon = userAmountInNanoTon + commissionInNanoTon;
-
-      // Проверяем, что у пользователя достаточно баланса
-      try {
-        const balance = await tonweb.provider.getBalance(walletAddress);
-        if (balance < totalAmountInNanoTon) {
-          alert('Недостаточно средств на балансе для совершения транзакции с учетом комиссии.');
-          return;
-        }
-      } catch (error) {
-        console.error("Ошибка при проверке баланса:", error);
-        alert('Не удалось проверить баланс.');
-        return;
-      }
-
-      // Генерируем timestamp на 5 минут вперед
-      const currentTimeSeconds = Math.floor(Date.now() / 1000);
-      const validUntil = currentTimeSeconds + 300; // Действительно в течение 5 минут
-
-      // Формируем payload с отметкой `deposit:` и адресом пользователя
-      const payloadBase64 = btoa(`deposit: ${walletAddress}`);
-
-      const transaction = {
-        valid_until: validUntil,
-        messages: [
-          {
-            address: appWalletAddress, // Отправляем на адрес приложения
-            amount: totalAmountInNanoTon.toString(), // Общая сумма (пополнение + комиссия)
-            payload: payloadBase64, // Передаем payload
-            stateInit: null // Оставляем null, если нет данных для инициализации состояния
-          }
-        ]
-      };
-
-      try {
-        const result = await tonConnectUI.sendTransaction(transaction);
-        console.log('Транзакция на пополнение отправлена:', result);
-        alert('Транзакция на пополнение отправлена.');
-        // Закрываем модальное окно
-        depositModal.classList.add('hidden');
-        depositModal.style.display = 'none';
-        depositAmountInput.value = '';
-        // Обновить баланс после небольшой задержки
-        setTimeout(updateBalance, 10000); // Ждем 10 секунд
-      } catch (error) {
-        console.error("Ошибка при отправке транзакции на пополнение:", error);
-        alert('Ошибка при отправке транзакции.');
-      }
-    });
-
-    // Обработчик кнопки "Вывести"
-    withdrawButton.addEventListener('click', () => {
-      alert('Функция вывода пока не реализована.');
-    });
 
   </script>
 </body>
