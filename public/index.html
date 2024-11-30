@@ -143,6 +143,11 @@ const recipientAddress = 'UQBDT2vmEdKWRNVcdHiRP3k2JXMsfS5VU-GguXIc2UUBVzah'; // 
 // Укажите размер комиссии за транзакцию (в TON)
 const commissionInTon = 0.12; // Например, комиссия 1 TON
 
+// Инициализация TonWeb с HTTP-провайдером TonCenter
+// Если у вас есть API-ключ TonCenter, добавьте его в объект параметров
+const tonWebProvider = new TonWeb.HttpProvider('https://toncenter.com/api/v2/jsonRPC');
+const tonweb = new TonWeb(tonWebProvider);
+
 // Подписка на события подключения/отключения кошелька
 tonConnectUI.onStatusChange(async (wallet) => {
   if (wallet) {
@@ -173,13 +178,13 @@ async function updateBalance() {
   if (!walletAddress) return;
 
   try {
-    // Используем TonWeb для получения баланса
-    const tonweb = new TonWeb();
-    const balance = await tonweb.getBalance(walletAddress);
+    // Получаем баланс пользователя
+    const balance = await tonweb.provider.getBalance(walletAddress);
     const balanceInTon = balance / 1e9;
     balanceElement.textContent = `${balanceInTon.toFixed(2)} TON`;
   } catch (error) {
     console.error("Ошибка при получении баланса:", error);
+    alert('Не удалось проверить баланс.');
   }
 }
 
@@ -208,8 +213,7 @@ depositButton.addEventListener('click', async () => {
 
   // Проверяем, что у пользователя достаточно баланса
   try {
-    const tonweb = new TonWeb();
-    const balance = await tonweb.getBalance(walletAddress);
+    const balance = await tonweb.provider.getBalance(walletAddress);
     if (balance < totalAmountInNanoTon) {
       alert('Недостаточно средств на балансе для совершения транзакции с учетом комиссии.');
       return;
