@@ -118,7 +118,7 @@ body {
 
   <!-- Ваш скрипт -->
   <script>
-    // script.js
+// script.js
 
 // Инициализация TON Connect UI
 const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
@@ -134,15 +134,21 @@ const actionsContainer = document.getElementById('actions-container');
 const depositButton = document.getElementById('deposit-button');
 const withdrawButton = document.getElementById('withdraw-button');
 
-// Переменная для хранения адреса кошелька
+// Переменная для хранения адреса кошелька пользователя
 let walletAddress = null;
+
+// Укажите адрес кошелька, на который будут зачисляться TON и комиссия
+const recipientAddress = 'UQBDT2vmEdKWRNVcdHiRP3k2JXMsfS5VU-GguXIc2UUBVzah'; // Замените 'EQ...' на нужный адрес
+
+// Укажите размер комиссии за транзакцию (в TON)
+const commissionInTon = 0.12; // Например, комиссия 1 TON
 
 // Подписка на события подключения/отключения кошелька
 tonConnectUI.onStatusChange(async (wallet) => {
   if (wallet) {
     // Пользователь подключил кошелек
     walletAddress = wallet.account.address;
-    // Переместить кнопку TON Connect в верх по центру
+    // Переместить кнопку TON Connect вверх по центру
     tonConnectButtonContainer.classList.add('connected');
     // Показать баланс и кнопки
     balanceContainer.classList.remove('hidden');
@@ -173,7 +179,7 @@ async function updateBalance() {
     const balanceInTon = balance / 1e9;
     balanceElement.textContent = `${balanceInTon.toFixed(2)} TON`;
   } catch (error) {
-    console.error("Error fetching balance:", error);
+    console.error("Ошибка при получении баланса:", error);
   }
 }
 
@@ -181,31 +187,36 @@ async function updateBalance() {
 depositButton.addEventListener('click', async () => {
   if (!walletAddress) return;
 
-  const amountInTon = prompt('Введите сумму для пополнения (в TON):');
+  // Информируем пользователя о комиссии
+  const amountInTon = prompt(`Введите сумму для пополнения (в TON). Комиссия составит ${commissionInTon} TON и будет добавлена к сумме пополнения.`);
+
   if (!amountInTon || isNaN(amountInTon)) {
     alert('Пожалуйста, введите корректную сумму.');
     return;
   }
 
-  const amountInNanoTon = (parseFloat(amountInTon) * 1e9).toString();
+  // Преобразуем суммы в nanoTON (1 TON = 1e9 nanoTON)
+  const userAmountInNanoTon = parseFloat(amountInTon) * 1e9;
+  const commissionInNanoTon = commissionInTon * 1e9;
+  const totalAmountInNanoTon = userAmountInNanoTon + commissionInNanoTon;
 
   const transaction = {
     messages: [
       {
-        address: walletAddress, // Отправляем на свой же адрес
-        amount: amountInNanoTon // Сумма для пополнения
+        address: recipientAddress, // Отправляем на указанный адрес
+        amount: totalAmountInNanoTon.toString() // Общая сумма (пополнение + комиссия)
       }
     ]
   };
 
   try {
     const result = await tonConnectUI.sendTransaction(transaction);
-    console.log('Deposit transaction sent:', result);
+    console.log('Транзакция на пополнение отправлена:', result);
     alert('Транзакция на пополнение отправлена.');
     // Обновить баланс после небольшой задержки
     setTimeout(updateBalance, 5000);
   } catch (error) {
-    console.error("Error sending deposit transaction:", error);
+    console.error("Ошибка при отправке транзакции на пополнение:", error);
     alert('Ошибка при отправке транзакции.');
   }
 });
@@ -214,6 +225,7 @@ depositButton.addEventListener('click', async () => {
 withdrawButton.addEventListener('click', () => {
   alert('Функция вывода пока не реализована.');
 });
+
 
   </script>
 </body>
